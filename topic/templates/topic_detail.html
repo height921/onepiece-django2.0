@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load comment_tags %}
+{% load likes_tags %}
+{% block title%}
+    讨论
+{% endblock %}
+{% block header_extends %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'topic/topic.css' %}">
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+    <section>
+    <div class="py-3">
+        <h2 class="text-center">{{ topic.title }}</h2>
+    </div>
+    <div class="container w-50">
+        <div class="bg-light border rounded p-3">
+             <small>
+                {{ topic.created_time.date }}|&nbsp;
+                分类:
+                <a href="{% url 'topic:topisc_with_type' topic.topic_type.pk %}">
+                <span class="font-weight-normal text-secondary" title="{{ topic.topic_type.type_introduction|safe }}"
+                      data-toggle="tooltip" data-html="true" data-placement="top">{{ topic.topic_type }}</span>
+                </a>
+            </small>
+            <div class="p-3">
+                <p>{{ topic.content|safe }}</p>
+            </div>
+            <div>
+                <span class="small">评论数: &nbsp;</span><span>{% get_comment_count topic %}</span>
+                <div class="like" onclick="likeChange(this, '{% get_content_type topic %}', {{ topic.pk }})">
+                    <ion-icon name="thumbs-up-outline" class="{% get_like_status topic %}" size="small" ></ion-icon>
+                    <span class="liked-num">{% get_like_count topic %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container w-50">
+        <h3>提交评论</h3>
+        {% if user.is_authenticated %}
+            <form action="{% url 'comment:submit_comment' %}" method="POST" id="comment_form">
+                 <label>{{ user.username }}，欢迎评论</label>
+                <div id="reply_content_container" style="display: none">
+                    <p>回复：</p>
+                    <div id="replay_content"></div>
+                </div>
+                {% csrf_token %}
+            {% get_comment_form topic as comment_form %}
+                {% for field in comment_form %}
+                    {{ field|safe }}
+                {% endfor %}
+                <span id="comment_error"></span>
+                <br>
+                <input type="submit" value="评论" class="btn btn-dark">
+            </form>
+        {% else %}
+            <span>您尚未登录，登录后方可评论</span>
+            <a href="{% url 'login' %}">登录</a>或者
+            <a href="{% url 'register' %}">注册</a>
+        {% endif %}
+    </div>
+    </section>
+    <section>
+        <div class="container w-50">
+            <h3>评论列表</h3>
+            <div id="comment_list">
+            {% get_comment_list topic as comments %}
+                {% for comment in comments %}
+                    <div class="container w-auto border border-1 py-3">
+                        <span class="h3">{{ comment.comment_user.username }}</span>
+                        <span class="small">发布于{{ comment.comment_time.date}}:</span>
+                        <div id="comment_{{ comment.pk }}" class="p-2">
+                        <span>{{ comment.text|safe }}</span>
+                        </div>
+                        <a href="javascript:reply({{ comment.pk }});">回复</a>
+                        {% for reply in comment.root_comment.all %}
+                            <div class="reply" >
+                                <span class="text-secondary">{{ reply.comment_user.username }}</span>
+                                <span>于{{ reply.comment_time.date }}</span>
+                                <span>回复</span>
+                                <span>{{ reply.reply_to.username }}:</span>
+                                <div id="comment_{{ reply.pk }}">
+                                    {{ reply.text|safe }}
+                                </div>
+                                <a href="javascript:reply({{ comment.pk }});">回复</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script src="https://unpkg.com/ionicons@5.0.0/dist/ionicons.js"></script>
+    <script rel="script">
+        function likeChange(obj, content_type, object_id) {
+            var is_like = obj.getElementsByClassName('active').length==0;
+            $.ajax({
+                url: '{% url "like_change" %}',
+                type: 'GET',
+                data:{
+                    content_type : content_type,
+                    object_id : object_id,
+                    is_like: is_like,
+                },
+                cache: false,
+                success: function (data) {
+                    if(data['status']=='SUCCESS'){
+                        // {#更新点赞状态#}
+                        var element = $(obj.getElementsByName("thumbs-up-outline"));
+                        if(is_like){
+                            element.addClass('active');
+                        }else {
+                            element.removeClass('active');
+                        }
+                        // {#更新点赞数量#}
+                        var liked_num = $(obj.getElementsByClassName('liked-num'));
+                        alert(liked_num);
+                        liked_num.text(data['liked_num']);
+                    }else {
+                        alert(data[messsge]);
+                    }
+                },
+                error:function (xhr) {
+                    alert("hello");
+                }
+            });
+            location.reload();
+        }
+        function reply(reply_comment_id){
+
+            $('#reply_comment_id').val(reply_comment_id);
+            var html = $('#comment_'+reply_comment_id).html();
+            $('#reply_content').html(html);
+            $('#reply_content_container').show();
+            $('html').animate({scrollTop:$('#comment_form').offset().top-60},300, function () {
+                CKEDITOR.instances['id_text'].focus();
+            })
+        }
+        $("#comment_form").submit(function(){
+            // 判断是否为空
+            $("#comment_error").text('');
+            if(CKEDITOR.instances["id_text"].document.getBody().getText().trim()==''){
+                $("#comment_error").text('评论内容不能为空');
+                return false;
+            }
+
+            // 更新数据到textarea
+            CKEDITOR.instances['id_text'].updateElement();
+            // 异步提交
+            $.ajax({
+                url: "{% url 'comment:submit_comment' %}",
+                type: 'POST',
+                data: $(this).serialize(),
+                cache: false,
+                success: function(data){
+                    if(data['status']=="SUCCESS"){
+                        // 插入数据
+                        // {#判断是一级评论还是回复#}
+                        {#if($('#reply_comment_id').val()==0){#}
+                        {#    //插入评论#}
+                        {#    var comment_html = '<div id="root_' + data['pk'] + '" class="comment"><span>' + data['username'] + '</span><span> (' + data['comment_time'] + ')：</span><div id="comment_' + data['pk'] + '">' + data['text'] + '</div><a href="javascript:reply(' + data['pk'] + ');">回复</a></div>';#}
+                        {##}
+                        {#    $("#comment_list").prepend(comment_html);#}
+                       // }else {
+                        {#    // {#插入回复#}
+                        {#     var reply_html ='<div class="reply"><span>' + data['username'] + '</span><span> (' + data['comment_time'] + ')</span><span> 回复 </span><span>' + data['reply_to'] + '：</span><div id="comment_' + data['pk'] + '">' + data['text'] + '</div><a href="javascript:reply(' + data['pk'] + ');">回复</a></div>';#}
+                        {#    $("#root_" + data['root_pk']).append(reply_html);#}
+                        //{#}#}
+                        // 清空编辑框的内容
+                        CKEDITOR.instances['id_text'].setData('');
+                    }else{
+                        // 显示错误信息
+                        $("#comment_error").text(data['message']);
+                    }
+                },
+                error: function(xhr){
+                    console.log(xhr);
+                }
+            });
+            location.reload();
+            return false;
+        });
+
+    </script>
+{% endblock %}

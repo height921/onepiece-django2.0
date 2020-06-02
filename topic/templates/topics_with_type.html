@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load comment_tags %}
+{% block title %}
+{% endblock %}
+{% block content %}
+    <section>
+        <div class="container w-50 py-3">
+            <div class="card mb-3">
+              <img class="card-img-top" src="{{ topic_type.image.url }}" alt="{{ topic_type.type_name }}">
+              <div class="card-body">
+                <h5 class="card-title">{{ topic_type.type_name }}</h5>
+                <p class="card-text">
+                    {{ topic_type.type_introduction|safe }}
+                </p>
+                <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+              </div>
+            </div>
+        </div>
+        <div class="container w-50">
+            <div>
+                <h3 class="text-center">讨论话题</h3>
+            </div>
+            <div>
+                {% for topic in topics %}
+                   <div class="container py-3 border rounded">
+                        <h3 ><a class="text-dark" href="{% url 'topic:topic_detail' topic.pk %}">{{ topic.title }}</a></h3>
+                        <small>
+                            {{ topic.created_time.date }}|&nbsp;
+                            分类:
+                            <a href="{% url 'topic:topisc_with_type' topic.topic_type.pk %}">
+                            <span class="font-weight-normal text-secondary" title="{{ topic.topic_type.type_introduction }}" data-toggle="tooltip"
+                            data-placement="top">{{ topic.topic_type }}</span>
+                            </a>
+                            <span>评论数：{% get_comment_count topic %}</span>
+                        </small>
+                        <hr>
+                        <small>
+                            <p>
+                                {{ topic.content|slice:50|safe }}...
+                                <a href="{% url 'topic:topic_detail' topic.pk %}" class="text-secondary small">查看更多内容</a>
+                            </p>
+                        </small>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

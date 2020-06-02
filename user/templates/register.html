@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-12 min-vh-100 d-flex flex-column justify-content-center">
+                <div class="row">
+                    <div class="col-lg-6 col-md-8 mx-auto">
+                    {% if not user.is_authenticated %}
+                        <div class="card rounded shadow shadow-sm">
+                            <div class="card-header">
+                                <h3>注册</h3>
+                            </div>
+                            <div class="card-body">
+                                <form action="" method="post">
+                                    {% csrf_token %}
+        {#                            {{ login_form }}#}
+                                    {% for field in register_form %}
+                                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        {{ field }}
+                                        <p class="text-danger"> {{ field.errors.as_text }}</p>
+                                    {% endfor %}
+                                    <br>
+                                    <input type="submit" value="注册" class="btn btn-success float-right">
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <script type="text/javascript">
+                            window.location.href='/';
+                        </script>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

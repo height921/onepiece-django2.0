@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load comment_tags %}
+{% load crispy_forms_tags %}
+{% block title %}
+    讨论列表
+{% endblock %}
+{% block header_extends %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'topic/topic.css' %}">
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+
+{% endblock %}
+{% block content %}
+{#    发起新的讨论#}
+    <section>
+        <div class="container w-50 py-3">
+            {% if user.is_authenticated %}
+                <p class="text-center">
+                  <button class="btn btn-dark" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                               发起一个新的讨论
+                  </button>
+                </p>
+                <div class="collapse" id="collapseExample">
+                  <div class="card card-body">
+                      <div id="add_topic" >
+                        <form action="" method="POST" id="topic_form">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-8">
+                                    {{ topic_form.title|as_crispy_field }}
+                                </div>
+                                    <div class="col-4">
+                                        {{ topic_form.topic_type|as_crispy_field }}
+                                    </div>
+                                <div class="col-12">
+                                    {{ topic_form.content|as_crispy_field }}
+                                </div>
+                            </div>
+                            <span id="topic_error"></span>
+                            <input type="submit" value="发起讨论">
+                        </form>
+                    </div>
+                  </div>
+                </div>
+
+
+            {% else %}
+                <span>您尚未登录，登录后方可发起讨论哟~</span>
+                <a href="{% url 'login' %}" class="btn btn-primary">登录</a>或者
+                <a href="{% url 'register' %}" class="btn btn-danger">注册</a>
+            {% endif %}
+        </div>
+    </section>
+{#    展示讨论列表#}
+    <section>
+    <div id="topic_list" class="container w-75">
+        <div class="row">
+            <div class="col-md-8">
+                {% for topic in topics %}
+                    <div class="container py-3 border rounded">
+                        <h3 ><a class="text-dark" href="{% url 'topic:topic_detail' topic.pk %}">{{ topic.title }}</a></h3>
+                        <small>
+                            {{ topic.created_time.date }}|&nbsp;
+                            分类:
+                            <a href="{% url 'topic:topisc_with_type' topic.topic_type.pk %}">
+                            <span class="font-weight-normal text-secondary" title="{{ topic.topic_type.type_introduction|safe }}"
+                                  data-toggle="tooltip" data-html="true" data-placement="top">{{ topic.topic_type }}</span>
+                            </a>
+                            <span>评论数：{% get_comment_count topic %}</span>
+                        </small>
+                        <hr>
+                        <small>
+                            <p>
+                                {{ topic.content|slice:50|safe }}...
+                                <a href="{% url 'topic:topic_detail' topic.pk %}" class="text-secondary small">查看更多内容</a>
+                            </p>
+                        </small>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-4 bg-light border rounded">
+                <h4 class="text-center py-1">海贼语录</h4>
+                <div class="py-2">
+                    <p>也许这个世界上并没有偶然，有的只是必然。“缘”不紧不慢的悄然形成，不知所措才是人生！</p>
+                    <div class="text-right">
+                        <span class="text-right"><em>——雷利</em></span>
+                    </div>
+                </div>
+                <hr>
+                <div class="py-2">
+                    <p>也许这个世界上并没有偶然，有的只是必然。“缘”不紧不慢的悄然形成，不知所措才是人生！</p>
+                    <div class="text-right">
+                        <span class="text-right"><em>——雷利</em></span>
+                    </div>
+                </div>
+                <hr>
+                <div class="py-2">
+                    <p>也许这个世界上并没有偶然，有的只是必然。“缘”不紧不慢的悄然形成，不知所措才是人生！</p>
+                    <div class="text-right">
+                        <span class="text-right"><em>——雷利</em></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+{% endblock %}
+{% block script%}
+    <script rel="script">
+     {#$("#topic_form").submit(function(){#}
+     {##}
+     {#       // 判断是否为空#}
+     {#       $("#topic_error").text('');#}
+     {#       // 更新数据到textarea#}
+     {#       CKEDITOR.instances['id_text'].updateElement();#}
+     {#       // 异步提交#}
+            {#$.ajax({#}
+            {#    url: "{% url 'topic:add_topic' %}",#}
+            {#    type: 'POST',#}
+            {#    data: $(this).serialize(),#}
+            {#    cache: false,#}
+            {#    success: function(data){#}
+            {#        alert('aaa');#}
+            {#        if(data['status']=="SUCCESS"){#}
+            {#            alert('hello');#}
+            {#            // 插入数据#}
+            {#            var topic_html = "<h3><a > data['title'] </a></h3>"+"<span>评论数：0</span>"#}
+            {##}
+            {#            $("#topic_list").prepend(topic_html);#}
+            {##}
+            {#            // 清空编辑框的内容#}
+            {#            CKEDITOR.instances['id_text'].setData('');#}
+            {#        }else{#}
+            {#            alert('world');#}
+            {#            // 显示错误信息#}
+            {#            $("#comment_error").text(data['message']);#}
+            {#        }#}
+            {#    },#}
+            {#    error: function(xhr){#}
+            {#        alert('qq');#}
+            {#        console.log(xhr);#}
+            {#    }#}
+     {#    //   });#}
+     {#       location.reload();#}
+     {#       return false;#}
+     {#   });#}
+         $(function () {
+        'use strict';
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    </script>
+{% endblock %}

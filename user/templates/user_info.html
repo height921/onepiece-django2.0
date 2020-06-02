@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <section>
+        <div>
+            {% if user.is_authenticated %}
+            <h2>{{ user.username }}</h2>
+            <ul>
+                <li>
+                    邮箱：{{ user.email }}
+                </li>
+            </ul>
+            {% else %}
+                <script type="text/javascript">
+                    window.location.href='/';
+                </script>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}
+    海贼王漫画
+{% endblock %}
+{% block content %}
+    <section>
+        <h2 class="text-center">海贼王漫画</h2>
+        <div class="container w-50">
+            {% for chapter in chapters %}
+                <div>
+                    <a href="{% url 'chapter_detail' chapter=chapter.chapter_number number=0 %}">
+                    <h5 class="text-secondary">
+                        {{ chapter.chapter_name }}
+                    </h5>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}

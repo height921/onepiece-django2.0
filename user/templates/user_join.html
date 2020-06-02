@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% load comment_tags %}
+{% block title %}
+    我参与的讨论
+{% endblock %}
+{% block content %}
+    <section>
+        <div class="py-3">
+            <h2 class="text-center">讨论</h2>
+        </div>
+        <div class="container w-50">
+            <span class="h4">发起的讨论数量：{{ topics.count }}</span>
+            <br>
+            <div class="py-3 px-5">
+{#                {% get_topic_list user as topics%}#}
+                {% for topic in topics %}
+                    <div class="py-2">
+                        <a href="{% url 'topic:topic_detail' topic.pk %}">
+                            <h5 class="text-muted">{{ topic.title }}</h5>
+                        </a>
+                        <small>
+                            {{ topic.created_time.date }}|&nbsp;
+                            分类:
+                            <a href="{% url 'topic:topisc_with_type' topic.topic_type.pk %}">
+                            <span class="font-weight-normal text-secondary" title="{{ topic.topic_type.type_introduction|safe}}" data-toggle="tooltip"
+                            data-placement="top">{{ topic.topic_type }}</span>
+                            </a>
+                            <span>评论数：{% get_comment_count topic %}</span>
+                        </small>
+                        <hr>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    <section>
+        <div class="py-3">
+            <h2 class="text-center">回答</h2>
+        </div>
+        <div class="container w-50">
+            <span class="h4">回答数量：{{ comments.count }}</span>
+            <br>
+            <div class="py-3 px-5">
+                {% for comment in comments %}
+                    <div>
+                        {% get_topic  comment.object_id as topic %}
+                        <a href="{% url 'topic:topic_detail' comment.object_id %}">
+                            <h5 class="text-muted">{{ topic.title }}</h5>
+                        </a>
+                        <small>
+                            {{ topic.created_time.date }}|&nbsp;
+                            分类:
+                            <a href="{% url 'topic:topisc_with_type' topic.topic_type.pk %}">
+                            <span class="font-weight-normal text-secondary" title="{{ topic.topic_type.type_introduction }}" data-toggle="tooltip"
+                            data-placement="top">{{ topic.topic_type }}</span>
+                            </a>
+                            <span>评论数：{% get_comment_count topic %}</span>
+                        </small>
+                        <div class="px-3 py-2">
+                            <span>{{ comment.text|safe }}</span>
+                        </div>
+                    </div>
+                    <hr>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

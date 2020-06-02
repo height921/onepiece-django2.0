@@ -1,0 +1,20 @@
+div.like {
+    color: #337ab7;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.5em 0.3em;
+}
+
+div.like .active{
+    color: #f22;
+}
+div.reply{
+    margin: 2em;
+}
+h1 a{
+    color: #ff2222;
+    font-size: small;
+}
+topic_type{
+    font-size: smaller;
+}

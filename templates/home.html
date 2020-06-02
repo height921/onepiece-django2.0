@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load comment_tags %}
+{% block title %}
+    主页
+{% endblock %}
+{% block header_extends %}
+{% endblock %}
+{% block content %}
+    <section class="py-5">
+        <h2 class="text-center">海贼王简介</h2>
+        <div class="container w-50">
+            <p>拥有财富、名声、权力，这世界上的一切的男人 “海贼王”哥尔·D·罗杰，在被行刑受死之前说了一句话，
+                让全世界的人都涌向了大海。“想要我的宝藏吗？如果想要的话，那就到海上去找吧，我全部都放在那里。
+                ”，世界开始迎接“大海贼时代”的来临  。</p>
+            <p>时值“大海贼时代”，为了寻找传说中海贼王罗杰所留下的大秘宝“ONE PIECE”，无数海贼扬起旗帜，互相争斗。
+                有一个梦想成为海贼王的少年叫路飞，他因误食“恶魔果实”而成为了橡皮人，在获得超人能力的同时付出了一辈子无法游泳的代价。
+                十年后，路飞为实现与因救他而断臂的香克斯的约定而出海，他在旅途中不断寻找志同道合的伙伴，
+                开始了以成为海贼王为目标的冒险旅程   。</p>
+        </div>
+    </section>
+    <section class="py-4 ">
+    <div class="container w-75">
+        <div class="row">
+            <div class="col-md-5 border rounded bg-light float-left">
+                <div class="py-2">
+                    <a href="{% url 'topic:topic_index' %}">
+                    <h3 class="text-center text-muted ">最新讨论话题</h3>
+                </a>
+                </div>
+                <div class="py-2">
+                    {% for topic in topics %}
+                        <div class="px-3">
+                                <a href="{% url 'topic:topic_detail' topic.pk %}">
+                                    <h5 class="text-info">{{ topic.title }}</h5>
+                                </a>
+                             <small>
+                                {{ topic.created_time.date }}|&nbsp;
+                                关于
+                                <a href="{% url 'topic:topisc_with_type' topic.topic_type.pk %}">
+                                <span class="font-weight-normal text-secondary" title="{{ topic.topic_type.type_introduction|safe }}"
+                                  data-toggle="tooltip" data-html="true" data-placement="top">{{ topic.topic_type }}</span>
+
+                                </a>
+                                <span>评论数：{% get_comment_count topic %}</span>
+                            </small>
+                            <hr>
+                        </div>
+                    {% endfor%}
+                </div>
+            </div>
+            <div class="col-md-2">
+
+            </div>
+            <div class="col-md-5 border rounded bg-light float-right">
+                <div class="py-2">
+                    <a href="{% url "comic_index" %}">
+                        <h3 class="text-muted text-center">最新海贼王漫画</h3>
+                    </a>
+                </div>
+                <div class="py-2">
+                    {% for chapter in chapters %}
+                        <div class="px-3">
+                            <a href="{% url 'chapter_detail' chapter.chapter_number 0 %}">
+                                <h5 class="text-info">{{ chapter.chapter_name }}</h5>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

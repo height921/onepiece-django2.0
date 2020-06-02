@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}
+    {{ obj.chapter_name }}
+{% endblock %}
+{% load static %}
+{% block content %}
+    <section>
+        <h2 class="text-center">
+            {% if number %}
+                第{{ number }}页
+            {% else %}
+                首页
+            {% endif %}
+        </h2>
+        <div class="container w-50 py-3">
+            <div >
+                {% if previous_chapter %}
+                <a href="{% url 'chapter_detail' previous_chapter.chapter_number 0 %}" class="text-secondary">
+                    上一话：{{ previous_chapter.chapter_name }}
+                </a>
+                {% else %}
+                    <span>没有上一话</span>
+                {% endif %}
+                &nbsp;
+                {% if  next_chapter %}
+                    <a href="{% url 'chapter_detail' next_chapter.chapter_number 0 %}" class="text-secondary">
+                        下一话：{{ next_chapter.chapter_name }}
+                    </a>
+                {% else %}
+                    <span>没有下一话了</span>
+                {% endif %}
+            </div>
+
+            <div class="py-4">
+                <img src="/media/images/{{ obj.chapter_number }}/{{ number }}.png" class="rounded img-thumbnail" id="show_image">
+            </div>
+            <div class="row py-2">
+                <div class="text-left col-md-6">
+                    {% if number > 0 %}
+                    <a href="{% url 'chapter_detail' obj.chapter_number number|add:"-1" %}" class="btn btn-secondary ">下一页</a>
+                    {% else %}
+                        <p>没有上一页</p>
+                    {% endif %}
+                </div>
+                <div class="text-right col-md-6">
+                    {% if number < obj.chapter_pages %}
+                    <a href="{% url 'chapter_detail' obj.chapter_number number|add:"1" %}" class="btn btn-secondary " id="next">下一页</a>
+                    {% else %}
+                        <p>没有下一页</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{#    <script rel="script" >#}
+{#        var count = 0;#}
+{#        function next() {#}
+{#            if(count<{{ obj.chapter_number }}){#}
+{#                count++;#}
+{#            }#}
+{#            document.getElementById("show_image").src="/media/images/{{ obj.chapter_pages }}/"+count+'.png';#}
+{#        }#}
+{#        function before() {#}
+{#            if(count>0){#}
+{#                count--;#}
+{#            }#}
+{#            document.getElementById("show_image").src="/media/images/979/"+count+'.png';#}
+{#        }#}
+{#    </script>#}
+{% endblock %}
+{% block script %}
+    <script rel="script" >
+        var count = 0;
+        function next() {
+            var number = {{ number }} + 1;
+        }
+        function before() {
+            if(count>0){
+                count--;
+            }
+            document.getElementById("show_image").src="/media/images/979/"+count+'.png';
+        }
+    </script>
+{% endblock %}
